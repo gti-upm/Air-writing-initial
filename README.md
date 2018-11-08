@@ -74,7 +74,7 @@ python train.py --restore_model=True --experiment_rootdir=./models/test_1 ^
 --weights_fname=model_weights.h5 ^
 --train_dir=./input/Air-writing-dataset/training/ ^
 --val_dir=./input/Air-writing-dataset/validation/ ^
---img_mode=rgb 
+--img_mode=grayscale 
 ```
 where the pre-trained model called `m ./models/test_1` must be in the directory you indicate in `--experiment_rootdir`.
 
