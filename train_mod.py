@@ -19,7 +19,6 @@ import data_utils_mod
 import log_utils
 from common_flags import FLAGS
 from time import time, strftime, localtime
-from scipy.ndimage import zoom
 import pdb
 
 
@@ -99,11 +98,7 @@ def getModelResnet(n, version, img_width, img_height, img_channels, output_dim, 
 
     return model
 
-def adjust(data, size):
-    factors = (size[0]/data.shape[0], size[1]/data.shape[1], size[2]/data.shape[2])
-    new_array = zoom(data, factors)
-    
-    return new_array
+
     
 def trainModel(train_data_generator, val_data_generator, model, initial_epoch):
     """
@@ -209,9 +204,7 @@ def _main():
     
     # Check if the number of classes in dataset corresponds to the one specified                                                    
     assert train_generator.num_classes == num_classes, \
-                        " Not macthing output dimensions in training data." 
-
-    train_generator = adjust(train_generator, final_size)                                                   
+                        " Not macthing output dimensions in training data."                                                  
 
 
     # Generate validation data with real-time augmentation

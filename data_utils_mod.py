@@ -6,6 +6,7 @@ import keras
 from keras import backend as K
 from keras.preprocessing.image import Iterator
 from keras.preprocessing.image import ImageDataGenerator
+from scipy.ndimage import zoom
 
 class DataGenerator(ImageDataGenerator):
     """
@@ -164,7 +165,7 @@ class DirectoryIterator(Iterator):
                 dtype=K.floatx())
         # Initialize batch of ground truth
         batch_y = np.zeros((current_batch_size, self.num_classes,),
-                                 dtype=K.floatx())
+                dtype=K.floatx())
                                  
         grayscale = self.img_mode == 'grayscale'
 
@@ -184,6 +185,13 @@ class DirectoryIterator(Iterator):
         batch_y = keras.utils.to_categorical(batch_y, num_classes=self.num_classes)
 
         return batch_x, batch_y
+
+
+def adjust(data, size):
+    factors = (size[0]/data.shape[0], size[1]/data.shape[1], size[2]/data.shape[2])
+    new_array = zoom(data, factors)
+    
+    return new_array
 
 
 def load_imgs(path, grayscale=False, target_size=None):
@@ -216,5 +224,8 @@ def load_imgs(path, grayscale=False, target_size=None):
         if grayscale:
             img = img.reshape((img.shape[0], img.shape[1], 1))
         imgs.append(img)
+        
+        data = np.asarray(imgs, dtype=np.float32)
+        new_data = adjust(data, target_size)
     
-    return np.asarray(imgs, dtype=np.float32)
+    return new_data
