@@ -1,12 +1,12 @@
 import os
 import numpy as np
 import cv2
+from scipy.ndimage import zoom
 
 import keras
 from keras import backend as K
 from keras.preprocessing.image import Iterator
 from keras.preprocessing.image import ImageDataGenerator
-from scipy.ndimage import zoom
 
 class DataGenerator(ImageDataGenerator):
     """
@@ -74,10 +74,10 @@ class DirectoryIterator(Iterator):
             raise ValueError('Invalid color mode:', img_mode,
                              '; expected "rgb" or "grayscale".')
         self.img_mode = img_mode
-        if self.img_mode == 'rgb':
-            self.image_shape = self.target_size + (3,)
-        else:
-            self.image_shape = self.target_size + (1,)
+        #if self.img_mode == 'rgb':
+        #   self.image_shape = (self.target_size[1], self.target_size[2])
+        #else:
+        #   self.image_shape = self.target_size + (1,)'''
         
         # Initialize number of classes
         self.num_classes = num_classes
@@ -161,11 +161,12 @@ class DirectoryIterator(Iterator):
         current_batch_size = index_array.shape[0]
                     
         # Initialize batch of images
-        batch_x = np.zeros((current_batch_size,) + self.image_shape,
+        batch_x = np.zeros((current_batch_size,) + self.target_size,
                 dtype=K.floatx())
+        
         # Initialize batch of ground truth
         batch_y = np.zeros((current_batch_size, self.num_classes,),
-                dtype=K.floatx())
+                                 dtype=K.floatx())
                                  
         grayscale = self.img_mode == 'grayscale'
 
@@ -178,6 +179,7 @@ class DirectoryIterator(Iterator):
             # Data augmentation
             x = self.image_data_generator.random_transform(x)
             x = self.image_data_generator.standardize(x)
+            
             batch_x[i] = x
 
         # Build batch of labels
@@ -185,14 +187,12 @@ class DirectoryIterator(Iterator):
         batch_y = keras.utils.to_categorical(batch_y, num_classes=self.num_classes)
 
         return batch_x, batch_y
-
-
+    
 def adjust(data, size):
     factors = (size[0]/data.shape[0], size[1]/data.shape[1], size[2]/data.shape[2])
     new_array = zoom(data, factors)
     
     return new_array
-
 
 def load_imgs(path, grayscale=False, target_size=None):
     """
@@ -207,7 +207,8 @@ def load_imgs(path, grayscale=False, target_size=None):
     """
     
     # Read input images
-    paths = [os.path.abspath(x) for x in os.listdir(path) if x.endswith('.png')]
+    paths = [os.path.join(path, x) for x in os.listdir(path) if x.endswith('.png')]
+    
     imgs = []
     
     for img_path in paths:
@@ -217,15 +218,11 @@ def load_imgs(path, grayscale=False, target_size=None):
             if len(img.shape) != 2:
                 img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     
-        if target_size:
-            if (img.shape[0], img.shape[1]) != target_size:
-                img = cv2.resize(img, (target_size[2], target_size[1]))
-    
         if grayscale:
-            img = img.reshape((img.shape[0], img.shape[1], 1))
+            img = img.reshape((img.shape[0], img.shape[1]))
         imgs.append(img)
         
-        data = np.asarray(imgs, dtype=np.float32)
-        new_data = adjust(data, target_size)
-    
-    return new_data
+    if target_size:
+        imgs = adjust(np.asarray(imgs, dtype=np.float32), target_size)
+        
+    return imgs

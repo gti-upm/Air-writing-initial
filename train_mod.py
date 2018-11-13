@@ -19,14 +19,15 @@ import data_utils_mod
 import log_utils
 from common_flags import FLAGS
 from time import time, strftime, localtime
+from scipy.ndimage import zoom
 import pdb
 
 
 # Constants
 TRAIN_PHASE = 1
 
-
-def getModel(img_width, img_height, img_channels, output_dim, weights_path):
+os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin'
+def getModel(num_img, img_height, img_width, output_dim, weights_path):
     """
     Initialize model.
 
@@ -42,7 +43,7 @@ def getModel(img_width, img_height, img_channels, output_dim, weights_path):
     
     ------------ FUTURE CNN?? TO FIT THE INPUT (MANY IMAGES)
     """
-    model = nets.resnet50(img_width, img_height, img_channels, output_dim)
+    model = nets.resnet50(num_img, img_height, img_width, output_dim)
     
     if weights_path:
         try:
@@ -53,7 +54,7 @@ def getModel(img_width, img_height, img_channels, output_dim, weights_path):
 
     return model
 
-def getModelResnet(n, version, img_width, img_height, img_channels, output_dim, weights_path):
+def getModelResnet(n, version, num_img, img_height, img_width, output_dim, weights_path):
     """
     Initialize model.
 
@@ -77,7 +78,7 @@ def getModelResnet(n, version, img_width, img_height, img_channels, output_dim, 
         depth = n * 9 + 2
     
 #    model = nets.resnet50(img_width, img_height, img_channels, output_dim)
-    input_shape = (img_height, img_width, img_channels);
+    input_shape = (num_img, img_height, img_width);
 
     if version == 2:
         model = cifar10_resnet.resnet_v2(input_shape=input_shape, depth=depth, num_classes=output_dim)
@@ -97,8 +98,6 @@ def getModelResnet(n, version, img_width, img_height, img_channels, output_dim, 
             print("Impossible to find weight path. Returning untrained model")
 
     return model
-
-
     
 def trainModel(train_data_generator, val_data_generator, model, initial_epoch):
     """
@@ -187,7 +186,7 @@ def _main():
 
     # Output dimension (7 classes/gestures): CAMBIAR SEGUN LAS CLASES DE LA BASE DE DATOS
     num_classes = 4
-       
+    #final_size = (120, 160, 160)
 
     # Generate training data with real-time augmentation: HABRÁ QUE CAMBIARLO
     # TODO LO QUE SE HAGA SOBRE LOS DATOS AQUI SE TENDRA QUE HACER EN LOS DATOS PARA EL TEST
@@ -195,6 +194,7 @@ def _main():
     
     # Iterator object containing training data to be generated batch by batch
     # ESTA ES LA FUNCIÓN QUE TENDREMOS QUE TOCAR. BATCH-SIZE: CUANTOS DATOS PASAMOS EN CADA "TANDA" POR PROBLEMAS DE MEMORIA
+    print(FLAGS.train_dir)
     train_generator = train_datagen.flow_from_directory(FLAGS.train_dir,
                                                         num_classes,
                                                         shuffle = True,
@@ -204,7 +204,7 @@ def _main():
     
     # Check if the number of classes in dataset corresponds to the one specified                                                    
     assert train_generator.num_classes == num_classes, \
-                        " Not macthing output dimensions in training data."                                                  
+                        " Not macthing output dimensions in training data."                                                   
 
 
     # Generate validation data with real-time augmentation
@@ -238,7 +238,7 @@ def _main():
     # Define model: SE DEFINE LA RED CON LOS PARAMETROS QUE QUERAMOS O SOBRE LOS PESOS QUE YA TENGAMOS ANTES
     n = 1
     version = 1 # 1 o 2
-    model = getModelResnet(n, version, img_width, img_height, img_channels,
+    model = getModelResnet(n, version, num_img, img_height, img_width,
                     num_classes, weights_path)
     
     # Save the architecture of the network as png: IMAGEN DE LA ESTRUCTURA DE LA RED
