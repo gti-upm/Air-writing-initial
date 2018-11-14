@@ -19,8 +19,6 @@ import data_utils_mod
 import log_utils
 from common_flags import FLAGS
 from time import time, strftime, localtime
-from scipy.ndimage import zoom
-import pdb
 
 
 # Constants
@@ -77,7 +75,6 @@ def getModelResnet(n, version, num_img, img_height, img_width, output_dim, weigh
     elif version == 2:
         depth = n * 9 + 2
     
-#    model = nets.resnet50(img_width, img_height, img_channels, output_dim)
     input_shape = (num_img, img_height, img_width);
 
     if version == 2:
@@ -186,7 +183,6 @@ def _main():
 
     # Output dimension (7 classes/gestures): CAMBIAR SEGUN LAS CLASES DE LA BASE DE DATOS
     num_classes = 4
-    #final_size = (120, 160, 160)
 
     # Generate training data with real-time augmentation: HABRÁ QUE CAMBIARLO
     # TODO LO QUE SE HAGA SOBRE LOS DATOS AQUI SE TENDRA QUE HACER EN LOS DATOS PARA EL TEST

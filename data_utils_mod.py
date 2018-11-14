@@ -106,6 +106,7 @@ class DirectoryIterator(Iterator):
         # Images instead, will be loaded iteratively as the same time the
         # training process needs a new batch.
         for gesture_id, gesture in enumerate(gestures):
+            print(gesture_id)
             gesture_path = os.path.join(directory, gesture)
             self.samples_per_class.append(len(os.listdir(gesture_path)))
             for rep_id, subdir in enumerate(sorted(os.listdir(gesture_path))):
@@ -115,8 +116,8 @@ class DirectoryIterator(Iterator):
                     self.samples +=1
                     
                     # Generate associated ground truth
-                    labels = gesture_id*np.ones((self.samples_per_class[-1]), dtype=np.int)
-                    self.ground_truth = np.concatenate((self.ground_truth,labels), axis=0)
+            labels = gesture_id*np.ones((self.samples_per_class[gesture_id]), dtype=np.int)
+            self.ground_truth = np.concatenate((self.ground_truth,labels), axis=0)
                     
         
         # Check if dataset is empty            

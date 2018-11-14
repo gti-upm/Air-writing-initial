@@ -1,6 +1,5 @@
 import gflags
 
-
 FLAGS = gflags.FLAGS
 
 # Random seed
@@ -8,8 +7,8 @@ gflags.DEFINE_bool('random_seed', True, 'Random seed')
 
 # Input
 gflags.DEFINE_integer('num_img', 120, 'Target Gesture Length')
-gflags.DEFINE_integer('img_width', 80, 'Target Image Width')
-gflags.DEFINE_integer('img_height', 60, 'Target Image Height')
+gflags.DEFINE_integer('img_width', 120, 'Target Image Width')
+gflags.DEFINE_integer('img_height', 120, 'Target Image Height')
 gflags.DEFINE_string('img_mode', "grayscale", 'Load mode for images, either '
                      'rgb or grayscale')
 
@@ -21,13 +20,13 @@ gflags.DEFINE_integer('initial_epoch', 0, 'Initial epoch to start training')
 gflags.DEFINE_float('initial_lr', 1e-4, 'Initial learning rate for adam')
 
 # Files
-gflags.DEFINE_string('experiment_rootdir', "./models", 'Folder '
+gflags.DEFINE_string('experiment_rootdir', "./models/test_2", 'Folder '
                      ' containing all the logs, model weights and results')
-gflags.DEFINE_string('train_dir', "./training", 'Folder containing'
+gflags.DEFINE_string('train_dir', "./input/Air-writing-dataset/training", 'Folder containing'
                      ' training experiments')
-gflags.DEFINE_string('val_dir', "./validation", 'Folder containing'
+gflags.DEFINE_string('val_dir', "./input/Air-writing-dataset/validation", 'Folder containing'
                      ' validation experiments')
-gflags.DEFINE_string('test_dir', "./testing", 'Folder containing'
+gflags.DEFINE_string('test_dir', "./input/Air-writing-dataset/test", 'Folder containing'
                      ' testing experiments')
 gflags.DEFINE_string('video_dir', "../video_1", 'Folder containing'
                      ' only one experiment to be processed')
@@ -37,7 +36,7 @@ gflags.DEFINE_string('exp_name', "exp_1", 'Name of the experiment'
 # Model
 gflags.DEFINE_bool('restore_model', True, 'Whether to restore a trained'
                    ' model for training')
-gflags.DEFINE_string('weights_fname', "./models/test_1/weights_099.h5", '(Relative) '
+gflags.DEFINE_string('weights_fname', "./models/test_1/weights_050.h5", '(Relative) '
                                           'filename of model weights')
 gflags.DEFINE_string('json_model_fname', "model_struct.json",
                           'Model struct json serialization, filename')
