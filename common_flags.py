@@ -20,7 +20,7 @@ gflags.DEFINE_integer('initial_epoch', 0, 'Initial epoch to start training')
 gflags.DEFINE_float('initial_lr', 1e-4, 'Initial learning rate for adam')
 
 # Files
-gflags.DEFINE_string('experiment_rootdir', "./models/test_2", 'Folder '
+gflags.DEFINE_string('experiment_rootdir', "./models/test_3", 'Folder '
                      ' containing all the logs, model weights and results')
 gflags.DEFINE_string('train_dir', "./input/Air-writing-dataset/training", 'Folder containing'
                      ' training experiments')
@@ -36,7 +36,7 @@ gflags.DEFINE_string('exp_name', "exp_1", 'Name of the experiment'
 # Model
 gflags.DEFINE_bool('restore_model', True, 'Whether to restore a trained'
                    ' model for training')
-gflags.DEFINE_string('weights_fname', "./models/test_1/weights_050.h5", '(Relative) '
+gflags.DEFINE_string('weights_fname', "./models/weights_064.h5", '(Relative) '
                                           'filename of model weights')
 gflags.DEFINE_string('json_model_fname', "model_struct.json",
                           'Model struct json serialization, filename')

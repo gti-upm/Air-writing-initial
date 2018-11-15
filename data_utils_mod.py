@@ -16,7 +16,7 @@ class DataGenerator(ImageDataGenerator):
     directory structure and labels. All the remaining functions remain
     unchanged.
     """
-    # SE REESCRIBE ESTA FUNCION, TODAS LAS DEMAS SE HEREDAN DE IMAGEDATAGENERATOR DE KERAS
+
     def flow_from_directory(self, directory, num_classes, target_size=(120,224,224),
                             img_mode='grayscale', batch_size=32, shuffle=True,
                             seed=None, follow_links=False):
@@ -74,10 +74,6 @@ class DirectoryIterator(Iterator):
             raise ValueError('Invalid color mode:', img_mode,
                              '; expected "rgb" or "grayscale".')
         self.img_mode = img_mode
-        #if self.img_mode == 'rgb':
-        #   self.image_shape = (self.target_size[1], self.target_size[2])
-        #else:
-        #   self.image_shape = self.target_size + (1,)'''
         
         # Initialize number of classes
         self.num_classes = num_classes

@@ -13,7 +13,7 @@ from keras import backend as K
 
 import logz
 import nets
-import cifar10_resnet
+import cifar10_resnet_mod
 import utils
 import data_utils_mod
 import log_utils
@@ -32,14 +32,12 @@ def getModel(num_img, img_height, img_width, output_dim, weights_path):
     # Arguments
        img_width: Target image widht.
        img_height: Target image height.
-       img_channels: Target image channels. -----------FUTURE NUMBER OF IMAGES
+       num_img: Target images per block
        output_dim: Dimension of model output (number of classes).
        weights_path: Path to pre-trained model.
 
     # Returns
        model: A Model instance.
-    
-    ------------ FUTURE CNN?? TO FIT THE INPUT (MANY IMAGES)
     """
     model = nets.resnet50(num_img, img_height, img_width, output_dim)
     
@@ -61,7 +59,7 @@ def getModelResnet(n, version, num_img, img_height, img_width, output_dim, weigh
        version: 1 for resnet v1 or 2 for v2.
        img_width: Target image widht.
        img_height: Target image height.
-       img_channels: Target image channels.----- # IMAGES PER BLOCK
+       num_img: Target images per block
        output_dim: Dimension of model output (number of classes).
        weights_path: Path to pre-trained model.
 
@@ -78,9 +76,9 @@ def getModelResnet(n, version, num_img, img_height, img_width, output_dim, weigh
     input_shape = (num_img, img_height, img_width);
 
     if version == 2:
-        model = cifar10_resnet.resnet_v2(input_shape=input_shape, depth=depth, num_classes=output_dim)
+        model = cifar10_resnet_mod.resnet_v2(input_shape=input_shape, depth=depth, num_classes=output_dim)
     else:
-        model = cifar10_resnet.resnet_v1(input_shape=input_shape, depth=depth, num_classes=output_dim)
+        model = cifar10_resnet_mod.resnet_v1(input_shape=input_shape, depth=depth, num_classes=output_dim)
 
     # Model name, depth and version
     model_type = 'ResNet%dv%d' % (depth, version)
@@ -108,7 +106,7 @@ def trainModel(train_data_generator, val_data_generator, model, initial_epoch):
     """
     # Configure training process
     model.compile(loss='categorical_crossentropy',
-              optimizer=Adam(lr=cifar10_resnet.lr_schedule(0)),
+              optimizer=Adam(lr=cifar10_resnet_mod.lr_schedule(0)),
               metrics=['categorical_accuracy'])
 
     # Save model with the lowest validation loss
@@ -124,7 +122,7 @@ def trainModel(train_data_generator, val_data_generator, model, initial_epoch):
     steps_per_epoch = int(np.ceil(train_data_generator.samples / FLAGS.batch_size))
     validation_steps = int(np.ceil(val_data_generator.samples / FLAGS.batch_size))-1
     
-    lr_scheduler = LearningRateScheduler(cifar10_resnet.lr_schedule)
+    lr_scheduler = LearningRateScheduler(cifar10_resnet_mod.lr_schedule)
 
     lr_reducer = ReduceLROnPlateau(factor=np.sqrt(0.1),
                                    cooldown=0,
@@ -172,16 +170,8 @@ def _main():
 
     # Input image dimensions: CAMBIAR EN COMMON_FLAGS : ESTA POR DEFECTO
     num_img, img_width, img_height = FLAGS.num_img, FLAGS.img_width, FLAGS.img_height
-    
-    # Image mode (RGB or grayscale)
-    if FLAGS.img_mode=='rgb':
-        img_channels = 3
-    elif FLAGS.img_mode == 'grayscale':
-        img_channels = 1
-    else:
-        raise IOError("Unidentified image mode: use 'grayscale' or 'rgb'")
 
-    # Output dimension (7 classes/gestures): CAMBIAR SEGUN LAS CLASES DE LA BASE DE DATOS
+    # Output dimension (4 classes/gestures)
     num_classes = 4
 
     # Generate training data with real-time augmentation: HABRÁ QUE CAMBIARLO
@@ -218,7 +208,6 @@ def _main():
     assert val_generator.num_classes == num_classes, \
                         " Not matching output dimensions in validation data."
                         
-
     # Weights to restore
     weights_path = FLAGS.weights_fname
     

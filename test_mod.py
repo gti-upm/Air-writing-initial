@@ -66,7 +66,7 @@ def _main():
     # Set testing mode (dropout/batchnormalization)
     K.set_learning_phase(TEST_PHASE)
     
-    # Output dimension (7 classes/gestures)
+    # Output dimension (4 classes/gestures)
     num_classes = 4
 
     # Generate testing data
