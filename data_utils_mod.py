@@ -2,11 +2,13 @@ import os
 import numpy as np
 import cv2
 from scipy.ndimage import zoom
+from common_flags import FLAGS
 
 import keras
 from keras import backend as K
 from keras.preprocessing.image import Iterator
 from keras.preprocessing.image import ImageDataGenerator
+from sklearn.model_selection import train_test_split
 
 class DataGenerator(ImageDataGenerator):
     """
@@ -17,11 +19,11 @@ class DataGenerator(ImageDataGenerator):
     unchanged.
     """
 
-    def flow_from_directory(self, directory, num_classes, target_size=(120,224,224),
+    def flow_from_directory(self, phase, num_classes, target_size=(120,224,224),
                             img_mode='grayscale', batch_size=32, shuffle=True,
                             seed=None, follow_links=False):
         return DirectoryIterator(
-                directory, num_classes, self, target_size=target_size, img_mode=img_mode,
+                phase, num_classes, self, target_size=target_size, img_mode=img_mode,
                 batch_size=batch_size, shuffle=shuffle, seed=seed,
                 follow_links=follow_links)
 
@@ -61,10 +63,10 @@ class DirectoryIterator(Iterator):
 
     # TODO: Add functionality to save images to have a look at the augmentation
     """
-    def __init__(self, directory, num_classes, image_data_generator,
+    def __init__(self, phase, num_classes, image_data_generator,
             target_size=(120,224,224), img_mode = 'grayscale',
             batch_size=32, shuffle=True, seed=None, follow_links=False):
-        self.directory = os.path.realpath(directory)
+        #self.directory = os.path.realpath(directory)
         self.image_data_generator = image_data_generator
         self.target_size = target_size
         self.follow_links = follow_links
@@ -75,6 +77,20 @@ class DirectoryIterator(Iterator):
                              '; expected "rgb" or "grayscale".')
         self.img_mode = img_mode
         
+        # File of database for the phase
+        if phase == 'train':
+            dirs_file = os.path.join(FLAGS.experiment_rootdir, 'train_files.txt')
+            labels_file = os.path.join(FLAGS.experiment_rootdir, 'train_labels.txt')
+        elif phase == 'val':
+            dirs_file = os.path.join(FLAGS.experiment_rootdir, 'val_files.txt')
+            labels_file = os.path.join(FLAGS.experiment_rootdir, 'val_labels.txt')
+        elif phase == 'test':
+            dirs_file = os.path.join(FLAGS.experiment_rootdir, 'test_files.txt')
+            labels_file = os.path.join(FLAGS.experiment_rootdir, 'test_labels.txt')
+        else:
+            raise ValueError('Invalid phase mode:', phase,
+                             '; expected "train", "val" or "test".')
+            
         # Initialize number of classes
         self.num_classes = num_classes
 
@@ -87,7 +103,7 @@ class DirectoryIterator(Iterator):
         # Labels (ground truth) of all samples/repetitions in dataset
         self.ground_truth = []
         
-        # Number of samples per class
+        """# Number of samples per class
         self.samples_per_class = []
         
         # First count how many gestures there are
@@ -114,7 +130,10 @@ class DirectoryIterator(Iterator):
                     # Generate associated ground truth
             labels = gesture_id*np.ones((self.samples_per_class[gesture_id]), dtype=np.int)
             self.ground_truth = np.concatenate((self.ground_truth,labels), axis=0)
-                    
+        """
+        self.filenames, self.ground_truth = cross_val_load(dirs_file, labels_file)
+
+        self.samples = len(self.filenames)            
         
         # Check if dataset is empty            
         if self.samples == 0:
@@ -170,9 +189,9 @@ class DirectoryIterator(Iterator):
         # Build batch of block-image data
         for i, j in enumerate(index_array):
             fname = self.filenames[j]
-            x = load_imgs(os.path.join(self.directory, fname),
-                                   grayscale=grayscale,
-                                   target_size=self.target_size)
+            x = load_imgs(fname,
+                          grayscale=grayscale,
+                          target_size=self.target_size)
             # Data augmentation
             x = self.image_data_generator.random_transform(x)
             x = self.image_data_generator.standardize(x)
@@ -188,8 +207,77 @@ class DirectoryIterator(Iterator):
 def adjust(data, size):
     factors = (size[0]/data.shape[0], size[1]/data.shape[1], size[2]/data.shape[2])
     new_array = zoom(data, factors)
-    
     return new_array
+
+def cross_val_create(data_path):
+    train_list = []
+    val_list = []
+    test_list = []
+    train_labels = []
+    val_labels =[]
+    test_labels = []
+    
+    for gesture_id, gest_dir in enumerate(sorted(os.listdir(data_path))):
+        gesture_path = os.path.join(data_path, gest_dir)
+        rep_paths = [os.path.join(gesture_path, rep_dir) for rep_dir in os.listdir(gesture_path)]
+            
+        gest_train, gest_test = train_test_split(rep_paths,
+                                                 test_size=0.2,
+                                                 random_state=42)
+        
+        gest_train, gest_val = train_test_split(gest_train,
+                                                test_size=0.25,
+                                                random_state=42)
+        
+        train_labels.extend(gesture_id*np.ones(len(gest_train), dtype=np.int))
+        val_labels.extend(gesture_id*np.ones(len(gest_val), dtype=np.int))
+        test_labels.extend(gesture_id*np.ones(len(gest_test), dtype=np.int))
+        train_list.extend(gest_train)
+        val_list.extend(gest_val)
+        test_list.extend(gest_test)
+        
+    # Name of files
+    train_file = os.path.join(FLAGS.experiment_rootdir, 'train_files.txt')
+    val_file = os.path.join(FLAGS.experiment_rootdir, 'val_files.txt')
+    test_file = os.path.join(FLAGS.experiment_rootdir, 'test_files.txt')
+    train_labels_file = os.path.join(FLAGS.experiment_rootdir, 'train_labels.txt')
+    val_labels_file = os.path.join(FLAGS.experiment_rootdir, 'val_labels.txt')
+    test_labels_file =  os.path.join(FLAGS.experiment_rootdir, 'test_labels.txt')
+    
+    # Create file of training directories
+    with open(train_file, 'w') as f:
+        for item in train_list:
+            f.write("%s\n" % item)
+    # Create file of validation directories
+    with open(val_file, 'w') as f:
+        for item in val_list:
+            f.write("%s\n" % item)
+    # Create file of test directories
+    with open(test_file, 'w') as f:
+        for item in test_list:
+            f.write("%s\n" % item)
+    # Create file of training labels
+    with open(train_labels_file, 'w') as f:
+        for item in train_labels:
+            f.write("%s\n" % item)
+    # Create file of validation labels
+    with open(val_labels_file, 'w') as f:
+        for item in val_labels:
+            f.write("%s\n" % item)
+    # Create file of test labels
+    with open(test_labels_file, 'w') as f:
+        for item in test_labels:
+            f.write("%s\n" % item)
+    return
+
+def cross_val_load(dirs_file, labels_file):
+    with open(dirs_file) as f:
+        dirs_list = f.read().splitlines()
+        
+    with open(labels_file) as f:
+        labels_list = f.read().splitlines()
+        
+    return dirs_list, labels_list
 
 def load_imgs(path, grayscale=False, target_size=None):
     """

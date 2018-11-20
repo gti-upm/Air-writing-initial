@@ -73,7 +73,7 @@ def _main():
     test_datagen = data_utils_mod.DataGenerator(rescale=1./255)
     
     # Iterator object containing testing data to be generated batch by batch
-    test_generator = test_datagen.flow_from_directory(FLAGS.test_dir,
+    test_generator = test_datagen.flow_from_directory('test', #FLAGS.test_dir,
                                                       num_classes,
                                                       shuffle = True,
                                                       img_mode = FLAGS.img_mode,
@@ -85,7 +85,8 @@ def _main():
     model = utils.jsonToModel(json_model_path)
 
     # Load weights
-    weights_load_path = os.path.join(FLAGS.weights_fname)
+    weights_load_path = os.path.abspath(FLAGS.weights_fname)
+    
     try:
         model.load_weights(weights_load_path)
         print("Loaded model from {}".format(weights_load_path))

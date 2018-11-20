@@ -147,9 +147,7 @@ def trainModel(train_data_generator, val_data_generator, model, initial_epoch):
                         callbacks=callbacks,
                         validation_data=val_data_generator,
                         validation_steps = validation_steps,
-                        initial_epoch=initial_epoch) # INITIAL EPOCH: POR SI EL ENTRENAMIENTO SE QUEDA A MEDIAS Y QUIERES QUE SIGA
-    # CON EL MEJOR MODELO, SE ENTRENA
-
+                        initial_epoch=initial_epoch)
 
 def _main():
     
@@ -167,7 +165,10 @@ def _main():
     # Create the experiment rootdir if not already there: create a model if the name of the one in the parameters doesn't exist
     if not os.path.exists(FLAGS.experiment_rootdir):
         os.makedirs(FLAGS.experiment_rootdir)
-
+        
+    # Split the database into training, validation and test sets
+    data_utils_mod.cross_val_create(FLAGS.data_path)
+    
     # Input image dimensions: CAMBIAR EN COMMON_FLAGS : ESTA POR DEFECTO
     num_img, img_width, img_height = FLAGS.num_img, FLAGS.img_width, FLAGS.img_height
 
@@ -181,7 +182,7 @@ def _main():
     # Iterator object containing training data to be generated batch by batch
     # ESTA ES LA FUNCIÓN QUE TENDREMOS QUE TOCAR. BATCH-SIZE: CUANTOS DATOS PASAMOS EN CADA "TANDA" POR PROBLEMAS DE MEMORIA
     print(FLAGS.train_dir)
-    train_generator = train_datagen.flow_from_directory(FLAGS.train_dir,
+    train_generator = train_datagen.flow_from_directory('train', #FLAGS.train_dir,
                                                         num_classes,
                                                         shuffle = True,
                                                         img_mode = FLAGS.img_mode,
@@ -197,7 +198,7 @@ def _main():
     val_datagen = data_utils_mod.DataGenerator(rescale = 1./255)
     
     # Iterator object containing validation data to be generated batch by batch
-    val_generator = val_datagen.flow_from_directory(FLAGS.val_dir,
+    val_generator = val_datagen.flow_from_directory('val', #FLAGS.val_dir,
                                                     num_classes,
                                                     shuffle = False,
                                                     img_mode = FLAGS.img_mode,
