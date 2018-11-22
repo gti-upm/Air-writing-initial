@@ -66,7 +66,6 @@ class DirectoryIterator(Iterator):
     def __init__(self, phase, num_classes, image_data_generator,
             target_size=(120,224,224), img_mode = 'grayscale',
             batch_size=32, shuffle=True, seed=None, follow_links=False):
-        #self.directory = os.path.realpath(directory)
         self.image_data_generator = image_data_generator
         self.target_size = target_size
         self.follow_links = follow_links
@@ -94,45 +93,11 @@ class DirectoryIterator(Iterator):
         # Initialize number of classes
         self.num_classes = num_classes
 
-        # Number of samples in dataset
-        self.samples = 0
-
-        # Filenames of all samples/repetitions in dataset. 
-        self.filenames = [] 
-        
-        # Labels (ground truth) of all samples/repetitions in dataset
-        self.ground_truth = []
-        
-        """# Number of samples per class
-        self.samples_per_class = []
-        
-        # First count how many gestures there are
-        gestures = []
-        for subdir in sorted(os.listdir(directory)):
-            if os.path.isdir(os.path.join(directory, subdir)):
-                gestures.append(subdir)  
-
-        # Decode dataset structure.
-        # All the filenames and ground truths are loaded in memory from the
-        # begining.
-        # Images instead, will be loaded iteratively as the same time the
-        # training process needs a new batch.
-        for gesture_id, gesture in enumerate(gestures):
-            print(gesture_id)
-            gesture_path = os.path.join(directory, gesture)
-            self.samples_per_class.append(len(os.listdir(gesture_path)))
-            for rep_id, subdir in enumerate(sorted(os.listdir(gesture_path))):
-                rep_path = os.path.join(gesture_path, subdir)
-                if os.path.isdir(rep_path):
-                    self.filenames.append(os.path.abspath(rep_path))
-                    self.samples +=1
-                    
-                    # Generate associated ground truth
-            labels = gesture_id*np.ones((self.samples_per_class[gesture_id]), dtype=np.int)
-            self.ground_truth = np.concatenate((self.ground_truth,labels), axis=0)
-        """
+        # Filenames of all samples/repetitions in dataset and Labels
+        # (ground truth) of all samples/repetitions in dataset       
         self.filenames, self.ground_truth = cross_val_load(dirs_file, labels_file)
 
+        # Number of samples in dataset
         self.samples = len(self.filenames)            
         
         # Check if dataset is empty            
@@ -220,15 +185,12 @@ def cross_val_create(data_path):
     for gesture_id, gest_dir in enumerate(sorted(os.listdir(data_path))):
         gesture_path = os.path.join(data_path, gest_dir)
         rep_paths = [os.path.join(gesture_path, rep_dir) for rep_dir in os.listdir(gesture_path)]
-            
-        gest_train, gest_test = train_test_split(rep_paths,
-                                                 test_size=0.2,
-                                                 random_state=42)
         
-        gest_train, gest_val = train_test_split(gest_train,
-                                                test_size=0.25,
-                                                random_state=42)
+        # Separate sets of data
+        gest_train, gest_test = train_test_split(rep_paths, test_size=0.2)
+        gest_train, gest_val = train_test_split(gest_train, test_size=0.25)
         
+        # Create lists of gestures and ground truth labels
         train_labels.extend(gesture_id*np.ones(len(gest_train), dtype=np.int))
         val_labels.extend(gesture_id*np.ones(len(gest_val), dtype=np.int))
         test_labels.extend(gesture_id*np.ones(len(gest_test), dtype=np.int))
@@ -293,7 +255,6 @@ def load_imgs(path, grayscale=False, target_size=None):
     
     # Read input images
     paths = [os.path.join(path, x) for x in os.listdir(path) if x.endswith('.png')]
-    
     imgs = []
     
     for img_path in paths:

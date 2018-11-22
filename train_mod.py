@@ -20,7 +20,6 @@ import log_utils
 from common_flags import FLAGS
 from time import time, strftime, localtime
 
-
 # Constants
 TRAIN_PHASE = 1
 
@@ -28,14 +27,12 @@ os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin'
 def getModel(num_img, img_height, img_width, output_dim, weights_path):
     """
     Initialize model.
-
     # Arguments
        img_width: Target image widht.
        img_height: Target image height.
        num_img: Target images per block
        output_dim: Dimension of model output (number of classes).
        weights_path: Path to pre-trained model.
-
     # Returns
        model: A Model instance.
     """
@@ -53,7 +50,6 @@ def getModel(num_img, img_height, img_width, output_dim, weights_path):
 def getModelResnet(n, version, num_img, img_height, img_width, output_dim, weights_path):
     """
     Initialize model.
-
     # Arguments
        n: parameter that determines the net depth.
        version: 1 for resnet v1 or 2 for v2.
@@ -62,7 +58,6 @@ def getModelResnet(n, version, num_img, img_height, img_width, output_dim, weigh
        num_img: Target images per block
        output_dim: Dimension of model output (number of classes).
        weights_path: Path to pre-trained model.
-
     # Returns
        model: A Model instance.
     """
@@ -97,7 +92,6 @@ def getModelResnet(n, version, num_img, img_height, img_width, output_dim, weigh
 def trainModel(train_data_generator, val_data_generator, model, initial_epoch):
     """
     Model training.
-
     # Arguments
        train_data_generator: Training data generated batch by batch.
        val_data_generator: Validation data generated batch by batch.
@@ -129,17 +123,11 @@ def trainModel(train_data_generator, val_data_generator, model, initial_epoch):
                                    patience=5,
                                    min_lr=0.5e-6)
     
-    #tensorboard = TensorBoard(log_dir="logs/{}".format(time()))
-    strTime = strftime("%Y%b%d_%Hh%Mm%Ss", localtime(time()))
-#    tensorboard = TensorBoard(log_dir="logs/{}".format(strTime), histogram_freq=10,
-#                              batch_size=32, write_graph=False, write_grads=True, 
-#                              write_images=False, embeddings_freq=0,
-#                              embeddings_layer_names=None, embeddings_metadata=None)
-    tensorboard = TensorBoard(log_dir="logs/{}".format(strTime), histogram_freq=0)
     # TENSORBOARD SIRVE PARA VISUALIZAR LOS RESULTADOS DE LAS ITERACIONES
     # HASTA AQUI SE HARÁ UN PROCESO ITERATIVO QUE GUARDARÁ DE TODOS LOS CASOS
     # EL MODELO CON EL MEJOR RESULTADO SOBRE LOS DATOS DE VALIDACIÓN
-    
+    strTime = strftime("%Y%b%d_%Hh%Mm%Ss", localtime(time()))
+    tensorboard = TensorBoard(log_dir="logs/{}".format(strTime), histogram_freq=0)
     callbacks = [writeBestModel, saveModelAndLoss, lr_reducer, lr_scheduler, tensorboard]
 
     model.fit_generator(train_data_generator,
@@ -169,7 +157,7 @@ def _main():
     # Split the database into training, validation and test sets
     data_utils_mod.cross_val_create(FLAGS.data_path)
     
-    # Input image dimensions: CAMBIAR EN COMMON_FLAGS : ESTA POR DEFECTO
+    # Input image dimensions
     num_img, img_width, img_height = FLAGS.num_img, FLAGS.img_width, FLAGS.img_height
 
     # Output dimension (4 classes/gestures)
@@ -180,8 +168,6 @@ def _main():
     train_datagen = data_utils_mod.DataGenerator(rescale = 1./255)
     
     # Iterator object containing training data to be generated batch by batch
-    # ESTA ES LA FUNCIÓN QUE TENDREMOS QUE TOCAR. BATCH-SIZE: CUANTOS DATOS PASAMOS EN CADA "TANDA" POR PROBLEMAS DE MEMORIA
-    print(FLAGS.train_dir)
     train_generator = train_datagen.flow_from_directory('train', #FLAGS.train_dir,
                                                         num_classes,
                                                         shuffle = True,
@@ -210,7 +196,7 @@ def _main():
                         " Not matching output dimensions in validation data."
                         
     # Weights to restore
-    weights_path = FLAGS.weights_fname
+    weights_path = FLAGS.initial_weights
     
     # Epoch from which training starts
     initial_epoch = 0
@@ -241,7 +227,6 @@ def _main():
     # Plot training and validation losses
     utils.plot_loss(FLAGS.experiment_rootdir)
 
-
 def main(argv):
     # Utility main to load flags
     try:
@@ -251,7 +236,6 @@ def main(argv):
 
       sys.exit(1)
     _main()
-
 
 if __name__ == "__main__":
     main(sys.argv)

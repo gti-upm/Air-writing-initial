@@ -3,9 +3,7 @@ import numpy as np
 import os
 import sys
 from sklearn import metrics
-
 from keras import backend as K
-
 import utils
 import data_utils_mod
 from common_flags import FLAGS 
@@ -13,7 +11,6 @@ from common_flags import FLAGS
 # Constants
 TEST_PHASE = 0
 CLASSES = ['0','1','2','3']
-
 os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin'
    
 def compute_highest_classification_errors(pred_probs, real_labels, n_errors=20):
@@ -33,17 +30,14 @@ def compute_highest_classification_errors(pred_probs, real_labels, n_errors=20):
     highest_errors = dist.argsort()[-n_errors:][::-1]
     return highest_errors
 
-
 def evaluate_classification(pred_probs, pred_labels, real_labels):
     """
     Evaluate some classification metrics. Compute average accuracy and highest
     errors.
-
     # Arguments
        pred_probs: predicted probabilities by the network.
        pred_labels: predicted labels by the network.
        real_labels: real labels (ground truth).
-       
     # Returns
        dictionary: dictionary containing the evaluated classification metrics
     """
@@ -60,7 +54,6 @@ def evaluate_classification(pred_probs, pred_labels, real_labels):
                   "highest_errors": highest_errors.tolist()}
     return dictionary
 
-
 def _main():
 
     # Set testing mode (dropout/batchnormalization)
@@ -73,7 +66,7 @@ def _main():
     test_datagen = data_utils_mod.DataGenerator(rescale=1./255)
     
     # Iterator object containing testing data to be generated batch by batch
-    test_generator = test_datagen.flow_from_directory('test', #FLAGS.test_dir,
+    test_generator = test_datagen.flow_from_directory('test',
                                                       num_classes,
                                                       shuffle = True,
                                                       img_mode = FLAGS.img_mode,
@@ -85,14 +78,13 @@ def _main():
     model = utils.jsonToModel(json_model_path)
 
     # Load weights
-    weights_load_path = os.path.abspath(FLAGS.weights_fname)
-    
+    #weights_load_path = os.path.abspath(FLAGS.weights_fname)
+    weights_load_path = os.path.abspath('./models/test_1/weights_043.h5')
     try:
         model.load_weights(weights_load_path)
         print("Loaded model from {}".format(weights_load_path))
     except:
         print("Impossible to find weight path. Returning untrained model")
-
 
     # Compile model
     model.compile(loss='categorical_crossentropy', optimizer='adam')
@@ -110,7 +102,6 @@ def _main():
     # Real labels (ground truth)
     real_labels = np.argmax(ground_truth, axis=-1)
           
-                  
     # Evaluate predictions: Average accuracy and highest errors
     print("-----------------------------------------------")
     print("Evalutaion:")
@@ -129,7 +120,6 @@ def _main():
     # Visualize confusion matrix                                           
     utils.plot_confusion_matrix(FLAGS.experiment_rootdir, real_labels, pred_labels,
                                 CLASSES, normalize=True)
-
                                                
 def main(argv):
     # Utility main to load flags
@@ -139,7 +129,6 @@ def main(argv):
       print ('Usage: %s ARGS\\n%s' % (sys.argv[0], FLAGS))
       sys.exit(1)
     _main()
-
 
 if __name__ == "__main__":
     main(sys.argv)
