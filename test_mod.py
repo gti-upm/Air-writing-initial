@@ -79,7 +79,7 @@ def _main():
 
     # Load weights
     #weights_load_path = os.path.abspath(FLAGS.weights_fname)
-    weights_load_path = os.path.abspath('./models/test_1/weights_043.h5')
+    weights_load_path = os.path.abspath('./models/test_4/weights_015.h5')
     try:
         model.load_weights(weights_load_path)
         print("Loaded model from {}".format(weights_load_path))
