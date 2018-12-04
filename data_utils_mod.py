@@ -18,6 +18,7 @@ class DataGenerator(ImageDataGenerator):
     directory structure and labels. All the remaining functions remain
     unchanged.
     """
+
     def flow_from_directory(self, phase, num_classes, target_size=(120,224,224),
                             img_mode='grayscale', batch_size=32, shuffle=True,
                             seed=None, follow_links=False):
@@ -112,9 +113,11 @@ class DirectoryIterator(Iterator):
         super(DirectoryIterator, self).__init__(self.samples,
                 batch_size, shuffle, seed)
 
+
     def _recursive_list(self, subpath):
         return sorted(os.walk(subpath, followlinks=self.follow_links),
                 key=lambda tpl: tpl[0])
+
 
     def next(self):
         """
@@ -172,8 +175,12 @@ def adjust(data, size):
     return new_array
 
 def cross_val_create(data_path):
-    train_list, val_list, test_list = [], [], []
-    train_labels, val_labels, test_labels = [], [], []
+    train_list = []
+    val_list = []
+    test_list = []
+    train_labels = []
+    val_labels =[]
+    test_labels = []
     
     for gesture_id, gest_dir in enumerate(sorted(os.listdir(data_path))):
         gesture_path = os.path.join(data_path, gest_dir)

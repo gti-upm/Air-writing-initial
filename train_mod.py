@@ -209,7 +209,7 @@ def _main():
 
     # Define model: SE DEFINE LA RED CON LOS PARAMETROS QUE QUERAMOS O SOBRE LOS PESOS QUE YA TENGAMOS ANTES
     n = 1
-    version = 2 # 1 o 2
+    version = 1 # 1 o 2
     model = getModelResnet(n, version, num_img, img_height, img_width,
                     num_classes, weights_path)
     

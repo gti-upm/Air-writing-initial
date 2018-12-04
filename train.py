@@ -24,7 +24,7 @@ import pdb
 # Constants
 TRAIN_PHASE = 1
 
-os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin'
+
 def getModel(img_width, img_height, img_channels, output_dim, weights_path):
     """
     Initialize model.

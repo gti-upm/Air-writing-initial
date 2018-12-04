@@ -191,7 +191,7 @@ def resnet_v1(input_shape, depth, num_classes=10):
         for res_block in range(num_res_blocks):
             strides = 1
             if stack > 0 and res_block == 0:  # first layer but not first stack
-                strides = 2  # downsample NOOOOOOO
+                strides = 2  # downsample
             y = resnet_layer(inputs=x,
                              num_filters=num_filters,
                              strides=strides)
@@ -272,7 +272,7 @@ def resnet_v2(input_shape, depth, num_classes=10):
             else:
                 num_filters_out = num_filters_in * 2
                 if res_block == 0:  # first layer but not first stage
-                    strides = 2    # downsample NOOOOOOO
+                    strides = 2    # downsample
 
             # bottleneck residual unit
             y = resnet_layer(inputs=x,
