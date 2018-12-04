@@ -13,7 +13,7 @@ This repository contains an example code used for hand-gesture recognition from 
 5) Add the graphviz bin folder to the PATH system environment variable (Example: "C:/Program Files (x86)/Graphviz2.38/bin/")
 6) Download and copy models from the link [Models](https://lima.gti.ssr.upm.es/index.php/s/1qkoHVfcnDSWaWL) to the subfolder "models".
 7) Capture dataset with the project [Leap acquisition](https://github.com/cda-gti-upm/Video-Acquisition-by-mouse-events).
-8) Copy dataset to the subfolder "input". The Leap air-writing dataset must have three subfolders: training, validation, and test, with the following folder structure inside each one:
+8) Copy dataset to the subfolder "data", with the following folder structure:
 
 ```
 gesture_0/
@@ -43,9 +43,8 @@ Alternatively:
 2) Activate the conda environment with the command "activate tensorflow".
 3) Execute:
 ```
-python test.py --experiment_rootdir=./models ^
+python test.py --experiment_rootdir=./models/test_1 ^
 --weights_fname=./models/weights_064.h5 ^
---test_dir=./input/Air-writing-dataset/testing/ ^
 --img_mode=grayscale
 ```
 Note1 : Depending on your installation, you will need to write ```python3``` or just ```python``` to run the code.
@@ -58,8 +57,7 @@ Alternatively:
 3) Execute:
 ```
 python train.py --experiment_rootdir=./models/test_1 ^
---train_dir=./input/Air-writing-dataset/training/ ^
---val_dir=./input/Air-writing-dataset/validation/ ^
+--data_path=./data/Air-writing-dataset/ ^
 --img_mode=grayscale 
 ```
 
@@ -72,8 +70,7 @@ See more flas in `common_flags.py` to set batch size, number of epochs, dataset 
 ```
 python train.py --restore_model=True --experiment_rootdir=./models/test_1 ^
 --weights_fname=model_weights.h5 ^
---train_dir=./input/Air-writing-dataset/training/ ^
---val_dir=./input/Air-writing-dataset/validation/ ^
+--data_path=./data/Air-writing-dataset/ ^
 --img_mode=grayscale 
 ```
 where the pre-trained model called `m ./models/test_1` must be in the directory you indicate in `--experiment_rootdir`.
