@@ -1,4 +1,4 @@
-# Air-writing recognition from an image classification viewpoint
+# Thermal hand-gesture recognition from an image classification viewpoint
 
 This repository contains an example code used for hand-gesture recognition from an image classification viewpoint. That means there is no previous hand-localization stage, but the class of the performed gesture is predicted from the whole image.
 
@@ -12,27 +12,27 @@ This repository contains an example code used for hand-gesture recognition from 
 4) Download and install "graphviz-2.38.msi" from https://graphviz.gitlab.io/_pages/Download/Download_windows.html.
 5) Add the graphviz bin folder to the PATH system environment variable (Example: "C:/Program Files (x86)/Graphviz2.38/bin/")
 6) Download and copy models from the link [Models](https://lima.gti.ssr.upm.es/index.php/s/1qkoHVfcnDSWaWL) to the subfolder "models".
-7) Capture dataset with the project [Leap acquisition](https://github.com/cda-gti-upm/Video-Acquisition-by-mouse-events).
-8) Copy dataset to the subfolder "data", with the following folder structure:
+7) Ask to GTI for access to the _Thermal hand gesture recognition dataset_.
+8) Download, extract, and copy dataset from the link [Thermal hand gesture recognition dataset](https://www.kaggle.com/gti-upm/thermal-hand-gesture-recognition-dataset) to the subfolder "input". The thermal hand-gesture dataset must have three subfolders: training, validation, and test, with the following folder structure inside each one:
 
 ```
-gesture_0/
-  rep_000/
+user_1/
+  class_1/
     frame_000000.png
     frame_000001.png
     ...
     frame_000999.png
     
-  rep_001/
+  class_2/
   ...
-  rep_NNN/
+  class_7/
   
-gesture_1/
+user_2/
   ...
   
-gesture_3/
+user_N/
 ```
-where `gesture_N` is a hand gesture type and `rep_N` is a repetition of the corresponding gesture.
+where `user_N` is a user name folder and `class_N` is a hand gesture type.
 
 
 ## Running the code on Windows 10
@@ -43,9 +43,10 @@ Alternatively:
 2) Activate the conda environment with the command "activate tensorflow".
 3) Execute:
 ```
-python test.py --experiment_rootdir=./models/test_1 ^
---weights_fname=./models/weights_064.h5 ^
---img_mode=grayscale
+python ../test.py --experiment_rootdir=../models ^
+--weights_fname=../models/weights_064.h5 ^
+--test_dir=../input/thermal_hand_gesture_recognition_dataset_80x60/testing/ ^
+--img_mode=rgb
 ```
 Note1 : Depending on your installation, you will need to write ```python3``` or just ```python``` to run the code.
 
@@ -57,8 +58,9 @@ Alternatively:
 3) Execute:
 ```
 python train.py --experiment_rootdir=./models/test_1 ^
---data_path=./data/Air-writing-dataset/ ^
---img_mode=grayscale 
+--train_dir=./input/thermal_hand_gesture_recognition_dataset_80x60/training/ ^
+--val_dir=./input/thermal_hand_gesture_recognition_dataset_80x60/validation/ ^
+--img_mode=rgb 
 ```
 
 See more flas in `common_flags.py` to set batch size, number of epochs, dataset directories, etc. 
@@ -70,8 +72,9 @@ See more flas in `common_flags.py` to set batch size, number of epochs, dataset 
 ```
 python train.py --restore_model=True --experiment_rootdir=./models/test_1 ^
 --weights_fname=model_weights.h5 ^
---data_path=./data/Air-writing-dataset/ ^
---img_mode=grayscale 
+--train_dir=./input/thermal_hand_gesture_recognition_dataset_80x60/training/ ^
+--val_dir=./input/thermal_hand_gesture_recognition_dataset_80x60/validation/ ^
+--img_mode=rgb 
 ```
 where the pre-trained model called `m ./models/test_1` must be in the directory you indicate in `--experiment_rootdir`.
 
